@@ -17,7 +17,6 @@ class _ListTestWidgetState extends State<ListTestWidget> {
   void initState() {
     super.initState();
     items = List.generate(widget.scenario.initialCount, (i) => i);
-
     widget.scenario.onAction = _modifyList;
   }
 
@@ -34,8 +33,12 @@ class _ListTestWidgetState extends State<ListTestWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: items.length,
-      itemBuilder: (_, i) => ListTile(title: Text("Item ${items[i]}")),
+      itemBuilder: (_, i) => ListTile(
+        title: Text("Item ${items[i]}"),
+      ),
     );
   }
 }

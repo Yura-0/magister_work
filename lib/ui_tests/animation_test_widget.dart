@@ -25,7 +25,7 @@ class _AnimationTestWidgetState extends State<AnimationTestWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return SingleChildScrollView(
       child: Wrap(
         spacing: 10,
         runSpacing: 10,

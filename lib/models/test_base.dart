@@ -1,8 +1,9 @@
 // Класс універсальної моделі тесту
 abstract class LoadTest {
   final String name;
+  final int iterations;
 
-  LoadTest(this.name);
+  LoadTest(this.name, {this.iterations = 100});
 
   /// підготовка до тесту
   Future<void> setup();

@@ -76,7 +76,7 @@ class ManagerButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16),
               textStyle: const TextStyle(fontSize: 18),
               backgroundColor:
-                  isSelected ? Colors.blueAccent : Colors.blueGrey,
+                  isSelected ? Colors.blueAccent : const Color.fromARGB(255, 242, 242, 242),
             ),
             child: Text(label),
           ),

@@ -17,7 +17,6 @@ class _FormTestWidgetState extends State<FormTestWidget> {
   void initState() {
     super.initState();
     controllers = List.generate(widget.scenario.fieldsCount, (_) => TextEditingController());
-
     widget.scenario.onAction = _simulateInput;
   }
 
@@ -31,14 +30,16 @@ class _FormTestWidgetState extends State<FormTestWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        for (var controller in controllers)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(controller: controller),
-          )
-      ],
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: controllers.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(controller: controllers[index]),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:magi_work/screens/bloc/test_config_cubit.dart';
+import 'package:magi_work/screens/test_run_screen.dart';
 
 class SelectTestScreen extends StatelessWidget {
   const SelectTestScreen({super.key});
@@ -40,7 +41,8 @@ class _TestSelectionForm extends StatelessWidget {
                 children: const [
                   TestCheckbox(label: "ListTest", testKey: "ListTest"),
                   TestCheckbox(label: "FormTest", testKey: "FormTest"),
-                  TestCheckbox(label: "AnimationTest", testKey: "AnimationTest"),
+                  TestCheckbox(
+                      label: "AnimationTest", testKey: "AnimationTest"),
                   TestCheckbox(label: "ApiTest", testKey: "ApiTest"),
                   TestCheckbox(
                       label: "SubscriptionTest", testKey: "SubscriptionTest"),
@@ -53,13 +55,15 @@ class _TestSelectionForm extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: state.selectedTests.isEmpty
+                onPressed: state.selectedTests.isEmpty || state.selectedManager == null
                     ? null
                     : () {
-                        // TODO: перейти на екран запуску тестів
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Тести запущені"),
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider.value(
+                              value: context.read<TestConfigCubit>(),
+                              child: const TestRunnerScreen(),
+                            ),
                           ),
                         );
                       },
