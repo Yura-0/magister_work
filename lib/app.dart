@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:magi_work/screens/bloc/test_config_cubit.dart';
 import 'package:magi_work/screens/result_screen.dart';
-import 'package:magi_work/screens/stress_test_screen.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/select_manager_screen.dart';
@@ -28,7 +27,6 @@ class MainApp extends StatelessWidget {
           '/': (context) => const HomeScreen(),
           '/select_manager': (context) => const SelectManagerScreen(),
           '/select_tests': (context) => const SelectTestScreen(),
-          '/stress_config': (context) => const StressConfigScreen(),
           '/results': (context) => const ResultsScreen(),
         },
       ),

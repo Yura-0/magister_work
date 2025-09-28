@@ -23,6 +23,20 @@ class TestResult {
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
+   factory TestResult.fromJson(Map<String, dynamic> json) {
+    return TestResult(
+      scenarioName: json["scenarioName"] as String,
+      stateManager: json["stateManager"] as String,
+      iterations: json["iterations"] as int,
+      avgFps: (json["avgFps"] as num).toDouble(),
+      avgFrameTimeMs: (json["avgFrameTimeMs"] as num).toDouble(),
+      avgLatencyMs: (json["avgLatencyMs"] as num).toDouble(),
+      ramUsageMb: (json["ramUsageMb"] as num).toDouble(),
+      widgetRebuilds: json["widgetRebuilds"] as int,
+      timestamp: DateTime.parse(json["timestamp"] as String),
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         "scenarioName": scenarioName,
         "stateManager": stateManager,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:magi_work/core/utils/file_export.dart';
 import 'package:magi_work/models/test_base.dart';
 import 'package:magi_work/screens/bloc/test_config_cubit.dart';
+import 'package:magi_work/screens/result_screen.dart';
 import 'package:magi_work/ui_tests/animation_test_widget.dart';
 import 'package:magi_work/ui_tests/api_test_widget.dart';
 import 'package:magi_work/ui_tests/form_test_widget.dart';
@@ -12,6 +14,8 @@ import '../tests/api_test.dart';
 import '../tests/form_test.dart';
 import '../tests/list_test.dart';
 import '../tests/subscription_test.dart';
+import '../core/metrics/stats_recorder.dart';
+
 
 class TestRunnerScreen extends StatefulWidget {
   const TestRunnerScreen({super.key});
@@ -24,13 +28,21 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   late List<LoadTest> activeTests = [];
   bool isRunning = false;
   int currentIteration = 0;
+  late StatsRecorder statsRecorder;
 
   @override
   void initState() {
     super.initState();
+    statsRecorder = StatsRecorder();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeTests();
     });
+  }
+
+  @override
+  void dispose() {
+    statsRecorder.stopListening();
+    super.dispose();
   }
 
   void _initializeTests() {
@@ -79,6 +91,10 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
       currentIteration = 0;
     });
 
+    // Сброс и запуск сбора метрик
+    statsRecorder.reset();
+    statsRecorder.startListening();
+
     // Setup всех тестов
     for (final test in activeTests) {
       await test.setup();
@@ -94,10 +110,16 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
         currentIteration = i + 1;
       });
 
+      // Начало измерения кадра
+      statsRecorder.startFrame();
+
       // Запускаем все тесты параллельно
       await Future.wait(
         activeTests.map((test) => test.runIteration()),
       );
+
+      // Конец измерения кадра
+      statsRecorder.endFrame();
 
       // Небольшая задержка между итерациями для визуализации
       await Future.delayed(const Duration(milliseconds: 10));
@@ -108,14 +130,49 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
       await test.teardown();
     }
 
+    // Остановка сбора метрик
+    statsRecorder.stopListening();
+
     if (mounted) {
       setState(() {
         isRunning = false;
       });
       
-      // Показать результаты
-      _showCompletionDialog();
+      // Сохранение результатов и переход на экран результатов
+      await _saveResults();
+      _navigateToResults();
     }
+  }
+
+  Future<void> _saveResults() async {
+    final cubit = context.read<TestConfigCubit>();
+    final state = cubit.state;
+    
+    // Создаем результат для каждого теста
+    for (final test in activeTests) {
+      final result = statsRecorder.buildResult(
+        test.name,
+        state.selectedManager?.toString().split('.').last ?? 'unknown',
+        state.iterations,
+      );
+      
+      // Сохраняем в кубит
+      cubit.addResult(result);
+      
+      // Сохраняем в файл
+      await FileExport.saveResult(result);
+    }
+  }
+
+  void _navigateToResults() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BlocProvider.value(
+          value: context.read<TestConfigCubit>(),
+          child: const ResultsScreen(),
+        ),
+      ),
+    );
   }
 
   void _showCompletionDialog() {
@@ -126,8 +183,12 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
         content: Text('Успішно виконано $currentIteration ітерацій для ${activeTests.length} тестів'),
         actions: [
           TextButton(
+            onPressed: () => _navigateToResults(),
+            child: const Text('Перейти до результатів'),
+          ),
+          TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: const Text('Закрити'),
           ),
         ],
       ),
@@ -138,6 +199,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     setState(() {
       isRunning = false;
     });
+    statsRecorder.stopListening();
   }
 
   void _goBack() {
@@ -179,9 +241,19 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Активні тести: ${activeTests.length}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Активні тести: ${activeTests.length}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Ітерації: ${currentIteration}/${activeTests.isNotEmpty ? activeTests.first.iterations : 0}',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
           ),
           Row(
             children: [
@@ -250,7 +322,7 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
           return Card(
             margin: const EdgeInsets.all(8),
             child: SizedBox(
-              height: 200, // Фиксированная высота для каждого теста
+              height: 200,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(

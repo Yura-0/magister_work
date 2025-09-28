@@ -4,7 +4,6 @@ import 'package:magi_work/screens/result_screen.dart';
 import 'package:magi_work/screens/select_test_screen.dart';
 import 'package:magi_work/screens/bloc/test_config_cubit.dart';
 import 'package:magi_work/screens/select_manager_screen.dart';
-import 'package:magi_work/screens/stress_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -44,19 +43,6 @@ class HomeScreen extends StatelessWidget {
                     builder: (_) => BlocProvider.value(
                       value: context.read<TestConfigCubit>(),
                       child: const SelectTestScreen(),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              BuildButton(
-                label: "Стрес-тест",
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<TestConfigCubit>(),
-                      child: const StressConfigScreen(),
                     ),
                   ),
                 ),
