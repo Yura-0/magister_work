@@ -7,11 +7,14 @@ environment:
   sdk: '>=3.4.4 <4.0.0'
 
 dependencies:
+  cpu_reader: ^3.0.0
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_riverpod: ^2.6.1
+  path_provider: ^2.1.5
   provider: ^6.1.5+1
+  system_info_plus: ^0.0.6
 
 dev_dependencies:
   flutter_test:
