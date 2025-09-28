@@ -83,67 +83,73 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
     setState(() {});
   }
 
-  Future<void> _runTests() async {
-    if (isRunning) return;
+ // Обнови метод _runTests в TestRunnerScreen
+Future<void> _runTests() async {
+  if (isRunning) return;
 
-    setState(() {
-      isRunning = true;
-      currentIteration = 0;
-    });
+  setState(() {
+    isRunning = true;
+    currentIteration = 0;
+  });
 
-    // Сброс и запуск сбора метрик
-    statsRecorder.reset();
-    statsRecorder.startListening();
+  // Сброс и запуск сбора метрик
+  statsRecorder.reset();
+  statsRecorder.startListening();
 
-    // Setup всех тестов
-    for (final test in activeTests) {
-      await test.setup();
-    }
-
-    // Запуск итераций
-    final totalIterations = activeTests.isNotEmpty ? activeTests.first.iterations : 0;
-    
-    for (int i = 0; i < totalIterations; i++) {
-      if (!mounted) break;
-      
-      setState(() {
-        currentIteration = i + 1;
-      });
-
-      // Начало измерения кадра
-      statsRecorder.startFrame();
-
-      // Запускаем все тесты параллельно
-      await Future.wait(
-        activeTests.map((test) => test.runIteration()),
-      );
-
-      // Конец измерения кадра
-      statsRecorder.endFrame();
-
-      // Небольшая задержка между итерациями для визуализации
-      await Future.delayed(const Duration(milliseconds: 10));
-    }
-
-    // Teardown всех тестов
-    for (final test in activeTests) {
-      await test.teardown();
-    }
-
-    // Остановка сбора метрик
-    statsRecorder.stopListening();
-
-    if (mounted) {
-      setState(() {
-        isRunning = false;
-      });
-      
-      // Сохранение результатов и переход на экран результатов
-      await _saveResults();
-      _navigateToResults();
-    }
+  // Setup всех тестов
+  for (final test in activeTests) {
+    await test.setup();
   }
 
+  // Запуск итераций
+  final totalIterations = activeTests.isNotEmpty ? activeTests.first.iterations : 0;
+  
+  for (int i = 0; i < totalIterations; i++) {
+    if (!mounted) break;
+    
+    setState(() {
+      currentIteration = i + 1;
+    });
+
+    // Начало измерения кадра и латенции
+    statsRecorder.startFrame();
+    final iterationStart = DateTime.now();
+
+    // Запускаем все тесты параллельно
+    await Future.wait(
+      activeTests.map((test) => test.runIteration()),
+    );
+
+    // Измеряем латенцию (время выполнения итерации)
+    final iterationEnd = DateTime.now();
+    final latencyMs = iterationEnd.difference(iterationStart).inMilliseconds.toDouble();
+    statsRecorder.recordLatencyMs(latencyMs);
+
+    // Конец измерения кадра
+    statsRecorder.endFrame();
+
+    // Небольшая задержка между итерациями для визуализации
+    await Future.delayed(const Duration(milliseconds: 10));
+  }
+
+  // Teardown всех тестов
+  for (final test in activeTests) {
+    await test.teardown();
+  }
+
+  // Остановка сбора метрик
+  statsRecorder.stopListening();
+
+  if (mounted) {
+    setState(() {
+      isRunning = false;
+    });
+    
+    // Сохранение результатов и переход на экран результатов
+    await _saveResults();
+    _navigateToResults();
+  }
+}
   Future<void> _saveResults() async {
     final cubit = context.read<TestConfigCubit>();
     final state = cubit.state;

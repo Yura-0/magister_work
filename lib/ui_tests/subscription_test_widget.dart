@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magi_work/core/metrics/widget_counter.dart';
 import '../tests/subscription_test.dart';
 
 class SubscriptionTestWidget extends StatefulWidget {
@@ -10,7 +11,7 @@ class SubscriptionTestWidget extends StatefulWidget {
   State<SubscriptionTestWidget> createState() => _SubscriptionTestWidgetState();
 }
 
-class _SubscriptionTestWidgetState extends State<SubscriptionTestWidget> {
+class _SubscriptionTestWidgetState extends State<SubscriptionTestWidget> with WidgetCounterMixin {
   int counter = 0;
 
   @override
@@ -20,7 +21,10 @@ class _SubscriptionTestWidgetState extends State<SubscriptionTestWidget> {
   }
 
   void _updateCounter() {
-    setState(() => counter++);
+    setState(() {
+      counter++;
+      incrementRebuild(); // Считаем ребилд
+    });
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magi_work/core/metrics/widget_counter.dart';
 import '../tests/animation_test.dart';
 
 class AnimationTestWidget extends StatefulWidget {
@@ -10,7 +11,7 @@ class AnimationTestWidget extends StatefulWidget {
   State<AnimationTestWidget> createState() => _AnimationTestWidgetState();
 }
 
-class _AnimationTestWidgetState extends State<AnimationTestWidget> {
+class _AnimationTestWidgetState extends State<AnimationTestWidget> with WidgetCounterMixin {
   bool toggled = false;
 
   @override
@@ -20,12 +21,15 @@ class _AnimationTestWidgetState extends State<AnimationTestWidget> {
   }
 
   void _toggleAnimation() {
-    setState(() => toggled = !toggled);
+    setState(() {
+      toggled = !toggled;
+      incrementRebuild(); // Считаем ребилд
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Center(
       child: Wrap(
         spacing: 10,
         runSpacing: 10,

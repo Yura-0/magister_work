@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magi_work/core/metrics/widget_counter.dart';
 import '../tests/api_test.dart';
 
 class ApiTestWidget extends StatefulWidget {
@@ -10,7 +11,7 @@ class ApiTestWidget extends StatefulWidget {
   State<ApiTestWidget> createState() => _ApiTestWidgetState();
 }
 
-class _ApiTestWidgetState extends State<ApiTestWidget> {
+class _ApiTestWidgetState extends State<ApiTestWidget> with WidgetCounterMixin {
   String data = "No data";
 
   @override
@@ -23,6 +24,7 @@ class _ApiTestWidgetState extends State<ApiTestWidget> {
     await Future.delayed(const Duration(milliseconds: 50));
     setState(() {
       data = "Data updated at ${DateTime.now().toIso8601String()}";
+      incrementRebuild(); // Считаем ребилд
     });
   }
 

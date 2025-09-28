@@ -21,10 +21,12 @@ class StatsRecorder {
   final FpsTracker fpsTracker = FpsTracker();
   final LatencyTracker latencyTracker = LatencyTracker();
   final MemoryTracker memoryTracker = MemoryTracker();
-  final WidgetCounter widgetCounter = WidgetCounter();
+  // Убираем создание нового экземпляра, используем синглтон
 
   // Временная метка начала итерации (microseconds)
   int? _iterationStartMicros;
+
+  WidgetCounter get widgetCounter => WidgetCounter(); // Получаем синглтон
 
   // Callback для SchedulerBinding (FrameTiming)
   void _onTimings(List<FrameTiming> timings) {
@@ -57,7 +59,7 @@ class StatsRecorder {
     fpsTracker.clear();
     latencyTracker.clear();
     memoryTracker.clear();
-    widgetCounter.reset();
+    WidgetCounter().reset(); // Сбрасываем синглтон
     _iterationStartMicros = null;
   }
 
@@ -91,7 +93,7 @@ class StatsRecorder {
       avgFrameTimeMs: fpsTracker.avgFrameTimeMs,
       avgLatencyMs: latencyTracker.avgLatencyMs,
       ramUsageMb: memoryTracker.avgMemoryMb,
-      widgetRebuilds: widgetCounter.rebuilds,
+      widgetRebuilds: WidgetCounter().rebuilds, // Используем синглтон
     );
   }
 }

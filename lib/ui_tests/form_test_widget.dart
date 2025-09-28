@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magi_work/core/metrics/widget_counter.dart';
 import '../tests/form_test.dart';
 
 class FormTestWidget extends StatefulWidget {
@@ -10,7 +11,7 @@ class FormTestWidget extends StatefulWidget {
   State<FormTestWidget> createState() => _FormTestWidgetState();
 }
 
-class _FormTestWidgetState extends State<FormTestWidget> {
+class _FormTestWidgetState extends State<FormTestWidget> with WidgetCounterMixin {
   late List<TextEditingController> controllers;
 
   @override
@@ -25,6 +26,7 @@ class _FormTestWidgetState extends State<FormTestWidget> {
       for (int i = 0; i < controllers.length; i++) {
         controllers[i].text += String.fromCharCode(97 + (i % 26));
       }
+      incrementRebuild(); // Считаем ребилд
     });
   }
 
