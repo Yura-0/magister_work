@@ -1,3 +1,4 @@
+// Віджет моделі тесту з списками
 import 'package:flutter/material.dart';
 import 'package:magi_work/core/metrics/widget_counter.dart';
 import '../tests/list_test.dart';

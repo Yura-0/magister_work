@@ -1,3 +1,4 @@
+// Модель результату тесту
 class TestResult {
   final String scenarioName;
   final String stateManager;

@@ -1,3 +1,4 @@
+// Адаптер для менеджеру Stateful
 import 'package:flutter/material.dart';
 import 'state_manager_base.dart';
 

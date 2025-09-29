@@ -1,3 +1,4 @@
+// Управляння станом обраних тестів та менеджерів
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:magi_work/models/test_results.dart';
 

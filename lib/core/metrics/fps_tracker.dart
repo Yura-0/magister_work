@@ -1,8 +1,7 @@
-// lib/core/metrics/fps_tracker.dart
+/// Трекер для заміру  FPS.
+/// Підтримує 2 режими: manual (startFrame/endFrame) и timings (SchedulerBinding FrameTiming).
 import 'dart:math';
 
-/// Трекер для измерения времени кадра (ms) и расчёта FPS.
-/// Поддерживает два источника: manual (startFrame/endFrame) и timings (SchedulerBinding FrameTiming).
 class FpsTracker {
   final List<double> _timingFrameMs = [];
   final List<double> _manualFrameMs = [];
@@ -15,7 +14,7 @@ class FpsTracker {
     _manualFrameMs.clear();
   }
 
-  /// Возвращает список всех измерений (timings + manual)
+  /// Повертає список всіх замірів (timings + manual)
   List<double> get allFrameMs => [..._timingFrameMs, ..._manualFrameMs];
 
   double get avgFrameTimeMs {

@@ -1,3 +1,4 @@
+// Контрактор для стейт менеджерів
 abstract class StateManagerAdapter {
   /// Назва менеджеру
   String get name;

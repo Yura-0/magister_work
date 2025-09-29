@@ -1,6 +1,4 @@
-// lib/core/metrics/widget_counter.dart
-
-// widget_counter.dart
+// Міксин для отримання кількості збудованих виджетів
 import 'package:flutter/material.dart';
 
 class WidgetCounter {
@@ -18,7 +16,6 @@ class WidgetCounter {
 }
 
 
-// widget_counter_mixin.dart
 mixin WidgetCounterMixin<T extends StatefulWidget> on State<T> {
   void incrementRebuild() {
     WidgetCounter().increment();

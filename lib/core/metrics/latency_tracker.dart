@@ -1,9 +1,9 @@
-// lib/core/metrics/latency_tracker.dart
+  /// Трекер затримки кадрів у секундах
 
 class LatencyTracker {
   final List<double> _latMs = [];
 
-  /// Записывает задержку в миллисекундах
+
   void recordLatencyMs(double ms) => _latMs.add(ms);
 
   void clear() => _latMs.clear();

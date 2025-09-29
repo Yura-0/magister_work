@@ -1,3 +1,4 @@
+// Віджет моделі тесту з підписками
 import 'package:flutter/material.dart';
 import 'package:magi_work/core/metrics/widget_counter.dart';
 import '../tests/subscription_test.dart';
