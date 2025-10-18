@@ -1,5 +1,8 @@
 // Екран результатів
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:magi_work/models/test_results.dart';
 import 'package:magi_work/screens/bloc/test_config_cubit.dart';
@@ -13,6 +16,13 @@ class ResultsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Результати тестування"),
         actions: [
+           IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () {
+              _copyResultsToClipboard(context);
+            },
+            tooltip: 'Копіювати результати в буфер обміну',
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () {
@@ -90,6 +100,56 @@ class ResultsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _copyResultsToClipboard(BuildContext context) {
+    final state = context.read<TestConfigCubit>().state;
+    if (state.results.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Немає результатів для копіювання')),
+      );
+      return;
+    }
+
+    try {
+      // Создаем структурированные данные для экспорта
+      final exportData = {
+        'exportedAt': DateTime.now().toIso8601String(),
+        'totalTests': state.results.length,
+        'summary': _calculateSummary(state.results),
+        'results': state.results.map((result) => result.toJson()).toList(),
+      };
+
+      // Конвертируем в красивый JSON
+      const encoder = JsonEncoder.withIndent('  ');
+      final jsonString = encoder.convert(exportData);
+
+      // Копируем в буфер обмена
+      Clipboard.setData(ClipboardData(text: jsonString));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Результати скопійовано в буфер обміну')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Помилка при копіюванні: $e')),
+      );
+    }
+  }
+
+   Map<String, dynamic> _calculateSummary(List<TestResult> results) {
+    final avgFps = results.map((r) => r.avgFps).reduce((a, b) => a + b) / results.length;
+    final avgFrameTime = results.map((r) => r.avgFrameTimeMs).reduce((a, b) => a + b) / results.length;
+    final avgRam = results.map((r) => r.ramUsageMb).reduce((a, b) => a + b) / results.length;
+    final avgLatency = results.map((r) => r.avgLatencyMs).reduce((a, b) => a + b) / results.length;
+
+    return {
+      'averageFps': avgFps,
+      'averageFrameTimeMs': avgFrameTime,
+      'averageRamUsageMb': avgRam,
+      'averageLatencyMs': avgLatency,
+      'totalWidgetRebuilds': results.map((r) => r.widgetRebuilds).reduce((a, b) => a + b),
+    };
   }
 
   Widget _buildSummaryCard(List<TestResult> results) {
