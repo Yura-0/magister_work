@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:magi_work/models/test_results.dart';
-import 'package:magi_work/screens/bloc/test_config_cubit.dart';
+import 'package:magi_work/blocs/test_config_cubit.dart';
 
 class ResultsScreen extends StatelessWidget {
   const ResultsScreen({super.key});

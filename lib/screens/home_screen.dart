@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:magi_work/screens/result_screen.dart';
 import 'package:magi_work/screens/select_test_screen.dart';
-import 'package:magi_work/screens/bloc/test_config_cubit.dart';
+import 'package:magi_work/blocs/test_config_cubit.dart';
 import 'package:magi_work/screens/select_manager_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -23,19 +23,19 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              BuildButton(
-                label: "Обрати менеджер стану",
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<TestConfigCubit>(),
-                      child: const SelectManagerScreen(),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+              // BuildButton(
+              //   label: "Обрати менеджер стану",
+              //   onTap: () => Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) => BlocProvider.value(
+              //         value: context.read<TestConfigCubit>(),
+              //         child: const SelectManagerScreen(),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
               BuildButton(
                 label: "Обрати тест",
                 onTap: () => Navigator.push(

@@ -6,24 +6,28 @@ import 'latency_tracker.dart';
 import 'memory_tracker.dart';
 import 'widget_counter.dart';
 
-
 class StatsRecorder {
-  final FpsTracker fpsTracker = FpsTracker();
-  final LatencyTracker latencyTracker = LatencyTracker();
-  final MemoryTracker memoryTracker = MemoryTracker();
+  final FpsTracker fpsTracker;
+  final LatencyTracker latencyTracker;
+  final MemoryTracker memoryTracker;
+  final WidgetCounter widgetCounter;
 
   int? _iterationStartMicros;
 
-  WidgetCounter get widgetCounter => WidgetCounter();
+  StatsRecorder()
+      : fpsTracker = FpsTracker(),
+        latencyTracker = LatencyTracker(),
+        memoryTracker = MemoryTracker(),
+        widgetCounter = WidgetCounter() {
+    reset(); 
+  }
 
-  
   void _onTimings(List<FrameTiming> timings) {
     for (final t in timings) {
       final ms = (t.buildDuration + t.rasterDuration).inMicroseconds / 1000.0;
       fpsTracker.addTimingFrame(ms);
     }
   }
-
 
   void startListening() {
     try {
@@ -33,27 +37,24 @@ class StatsRecorder {
     }
   }
 
-  
   void stopListening() {
     try {
       SchedulerBinding.instance.removeTimingsCallback(_onTimings);
     } catch (e) {}
   }
 
-    void reset() {
+  void reset() {
     fpsTracker.clear();
     latencyTracker.clear();
     memoryTracker.clear();
-    WidgetCounter().reset(); 
+    widgetCounter.reset(); 
     _iterationStartMicros = null;
   }
 
-  
   void startFrame() {
     _iterationStartMicros = DateTime.now().microsecondsSinceEpoch;
   }
 
-  
   void endFrame() {
     final now = DateTime.now().microsecondsSinceEpoch;
     if (_iterationStartMicros != null) {
@@ -61,14 +62,12 @@ class StatsRecorder {
       fpsTracker.addManualFrame(ms);
       _iterationStartMicros = null;
     }
-  
+
     memoryTracker.record();
   }
 
-  
   void recordLatencyMs(double ms) => latencyTracker.recordLatencyMs(ms);
 
-  
   TestResult buildResult(String scenario, String manager, int iterations) {
     return TestResult(
       scenarioName: scenario,
@@ -78,7 +77,7 @@ class StatsRecorder {
       avgFrameTimeMs: fpsTracker.avgFrameTimeMs,
       avgLatencyMs: latencyTracker.avgLatencyMs,
       ramUsageMb: memoryTracker.avgMemoryMb,
-      widgetRebuilds: WidgetCounter().rebuilds,
+      widgetRebuilds: widgetCounter.rebuilds,
     );
   }
 }

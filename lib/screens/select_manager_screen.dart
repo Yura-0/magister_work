@@ -1,7 +1,7 @@
 // Екран вибору менеджера стану
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:magi_work/screens/bloc/test_config_cubit.dart';
+import 'package:magi_work/blocs/test_config_cubit.dart';
 
 
 class SelectManagerScreen extends StatelessWidget {

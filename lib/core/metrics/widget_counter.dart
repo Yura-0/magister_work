@@ -2,19 +2,17 @@
 import 'package:flutter/material.dart';
 
 class WidgetCounter {
-  static final WidgetCounter _instance = WidgetCounter._internal();
-  int rebuilds = 0;
+  int _rebuilds = 0;
 
-  factory WidgetCounter() {
-    return _instance;
-  }
+  // Простой конструктор
+  WidgetCounter();
 
-  WidgetCounter._internal();
-
-  void increment() => rebuilds++;
-  void reset() => rebuilds = 0;
+  int get rebuilds => _rebuilds;
+  
+  void increment() => _rebuilds++;
+  
+  void reset() => _rebuilds = 0;
 }
-
 
 mixin WidgetCounterMixin<T extends StatefulWidget> on State<T> {
   void incrementRebuild() {
