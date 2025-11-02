@@ -16,6 +16,7 @@ import '../tests/form_test.dart';
 import '../tests/list_test.dart';
 import '../tests/subscription_test.dart';
 import '../core/metrics/stats_recorder.dart';
+import '../core/metrics/widget_counter.dart'; // Додаємо імпорт
 
 class TestRunnerScreen extends StatefulWidget {
   const TestRunnerScreen({super.key});
@@ -246,7 +247,10 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
           ),
           
           // Виджеты тестов
-          _TestWidgetsList(activeTests: activeTests),
+          _TestWidgetsList(
+            activeTests: activeTests,
+            testRecorders: _testRecorders,
+          ),
         ],
       ),
     );
@@ -352,8 +356,12 @@ class _ProgressBar extends StatelessWidget {
 
 class _TestWidgetsList extends StatelessWidget {
   final List<LoadTest> activeTests;
+  final Map<String, StatsRecorder> testRecorders;
 
-  const _TestWidgetsList({required this.activeTests});
+  const _TestWidgetsList({
+    required this.activeTests,
+    required this.testRecorders,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -368,6 +376,9 @@ class _TestWidgetsList extends StatelessWidget {
     return Expanded(
       child: ListView(
         children: activeTests.map((test) {
+          final recorder = testRecorders[test.name];
+          if (recorder == null) return const SizedBox();
+          
           return Card(
             margin: const EdgeInsets.all(8),
             child: SizedBox(
@@ -386,7 +397,10 @@ class _TestWidgetsList extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Expanded(
-                      child: _TestWidget(test: test),
+                      child: WidgetCounterScope(
+                        counter: recorder.widgetCounter,
+                        child: _TestWidget(test: test),
+                      ),
                     ),
                   ],
                 ),

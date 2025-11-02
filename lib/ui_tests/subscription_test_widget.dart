@@ -30,6 +30,7 @@ class _SubscriptionTestWidgetState extends State<SubscriptionTestWidget> with Wi
 
   @override
   Widget build(BuildContext context) {
+         incrementRebuild();
     return Center(
       child: Text("Updates: $counter", style: const TextStyle(fontSize: 24)),
     );

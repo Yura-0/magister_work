@@ -33,7 +33,7 @@ class StatsRecorder {
     try {
       SchedulerBinding.instance.addTimingsCallback(_onTimings);
     } catch (e) {
-      
+      // Обробка помилок
     }
   }
 
@@ -78,6 +78,13 @@ class StatsRecorder {
       avgLatencyMs: latencyTracker.avgLatencyMs,
       ramUsageMb: memoryTracker.avgMemoryMb,
       widgetRebuilds: widgetCounter.rebuilds,
+      // Нові метрики
+      stdDevFrameTimeMs: fpsTracker.stdDevFrameTimeMs,
+      percentile95FrameTimeMs: fpsTracker.percentile95FrameTimeMs,
+      jankFramesCount: fpsTracker.jankFramesCount,
+      jankFramesPercent: fpsTracker.jankFramesPercent,
+      minLatencyMs: latencyTracker.minLatencyMs,
+      maxLatencyMs: latencyTracker.maxLatencyMs,
     );
   }
 }

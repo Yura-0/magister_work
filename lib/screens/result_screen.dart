@@ -1,6 +1,5 @@
 // Екран результатів
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +15,7 @@ class ResultsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Результати тестування"),
         actions: [
-           IconButton(
+          IconButton(
             icon: const Icon(Icons.copy),
             onPressed: () {
               _copyResultsToClipboard(context);
@@ -61,35 +60,46 @@ class ResultsScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      headingRowColor: MaterialStateProperty.resolveWith(
-                        (states) => Colors.blue[50],
+                    scrollDirection: Axis.vertical,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        headingRowColor: MaterialStateProperty.resolveWith(
+                          (states) => Colors.blue[50],
+                        ),
+                        columns: const [
+                          DataColumn(label: Text("Сценарій", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Менеджер", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Ітерації", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("FPS", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Frame Time (мс)", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("±σ Frame Time", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("95% Frame Time", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Jank %", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Latency (мс)", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Min/Max Latency", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("RAM (МБ)", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Rebuilds", style: TextStyle(fontWeight: FontWeight.bold))),
+                        ],
+                        rows: state.results.map((TestResult result) {
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(result.scenarioName)),
+                              DataCell(Text(result.stateManager)),
+                              DataCell(Text(result.iterations.toString())),
+                              DataCell(Text(result.avgFps.toStringAsFixed(1))),
+                              DataCell(Text(result.avgFrameTimeMs.toStringAsFixed(2))),
+                              DataCell(Text("±${result.stdDevFrameTimeMs.toStringAsFixed(2)}")),
+                              DataCell(Text(result.percentile95FrameTimeMs.toStringAsFixed(2))),
+                              DataCell(Text("${result.jankFramesPercent.toStringAsFixed(1)}%")),
+                              DataCell(Text(result.avgLatencyMs.toStringAsFixed(2))),
+                              DataCell(Text("${result.minLatencyMs.toStringAsFixed(2)}/${result.maxLatencyMs.toStringAsFixed(2)}")),
+                              DataCell(Text(result.ramUsageMb.toStringAsFixed(1))),
+                              DataCell(Text(result.widgetRebuilds.toString())),
+                            ],
+                          );
+                        }).toList(),
                       ),
-                      columns: const [
-                        DataColumn(label: Text("Сценарій", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("Менеджер", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("Ітерації", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("FPS", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("Frame Time (мс)", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("Latency (мс)", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("RAM (МБ)", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("Rebuilds", style: TextStyle(fontWeight: FontWeight.bold))),
-                      ],
-                      rows: state.results.map((TestResult result) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(result.scenarioName)),
-                            DataCell(Text(result.stateManager)),
-                            DataCell(Text(result.iterations.toString())),
-                            DataCell(Text(result.avgFps.toStringAsFixed(2))),
-                            DataCell(Text(result.avgFrameTimeMs.toStringAsFixed(2))),
-                            DataCell(Text(result.avgLatencyMs.toStringAsFixed(2))),
-                            DataCell(Text(result.ramUsageMb.toStringAsFixed(2))),
-                            DataCell(Text(result.widgetRebuilds.toString())),
-                          ],
-                        );
-                      }).toList(),
                     ),
                   ),
                 ),
@@ -137,17 +147,21 @@ class ResultsScreen extends StatelessWidget {
     }
   }
 
-   Map<String, dynamic> _calculateSummary(List<TestResult> results) {
+  Map<String, dynamic> _calculateSummary(List<TestResult> results) {
     final avgFps = results.map((r) => r.avgFps).reduce((a, b) => a + b) / results.length;
     final avgFrameTime = results.map((r) => r.avgFrameTimeMs).reduce((a, b) => a + b) / results.length;
     final avgRam = results.map((r) => r.ramUsageMb).reduce((a, b) => a + b) / results.length;
     final avgLatency = results.map((r) => r.avgLatencyMs).reduce((a, b) => a + b) / results.length;
+    final avgStdDev = results.map((r) => r.stdDevFrameTimeMs).reduce((a, b) => a + b) / results.length;
+    final totalJankFrames = results.map((r) => r.jankFramesCount).reduce((a, b) => a + b);
 
     return {
       'averageFps': avgFps,
       'averageFrameTimeMs': avgFrameTime,
       'averageRamUsageMb': avgRam,
       'averageLatencyMs': avgLatency,
+      'averageStdDevFrameTimeMs': avgStdDev,
+      'totalJankFrames': totalJankFrames,
       'totalWidgetRebuilds': results.map((r) => r.widgetRebuilds).reduce((a, b) => a + b),
     };
   }
@@ -156,6 +170,7 @@ class ResultsScreen extends StatelessWidget {
     final avgFps = results.map((r) => r.avgFps).reduce((a, b) => a + b) / results.length;
     final avgFrameTime = results.map((r) => r.avgFrameTimeMs).reduce((a, b) => a + b) / results.length;
     final avgRam = results.map((r) => r.ramUsageMb).reduce((a, b) => a + b) / results.length;
+    final totalJankFrames = results.map((r) => r.jankFramesCount).reduce((a, b) => a + b);
 
     return Card(
       margin: const EdgeInsets.all(16),
@@ -172,9 +187,10 @@ class ResultsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatItem("Середній FPS", avgFps.toStringAsFixed(2)),
+                _buildStatItem("Середній FPS", avgFps.toStringAsFixed(1)),
                 _buildStatItem("Час кадру", "${avgFrameTime.toStringAsFixed(2)} мс"),
-                _buildStatItem("Пам'ять", "${avgRam.toStringAsFixed(2)} МБ"),
+                _buildStatItem("Пам'ять", "${avgRam.toStringAsFixed(1)} МБ"),
+                _buildStatItem("Jank кадри", totalJankFrames.toString()),
                 _buildStatItem("Тестів", results.length.toString()),
               ],
             ),
@@ -189,12 +205,13 @@ class ResultsScreen extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          style: const TextStyle(fontSize: 10, color: Colors.grey),
+          textAlign: TextAlign.center,
         ),
       ],
     );

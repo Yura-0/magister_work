@@ -35,6 +35,7 @@ class _ListTestWidgetState extends State<ListTestWidget> with WidgetCounterMixin
 
   @override
   Widget build(BuildContext context) {
+         incrementRebuild();
     return ListView.builder(
       shrinkWrap: true,
       physics: const AlwaysScrollableScrollPhysics(),

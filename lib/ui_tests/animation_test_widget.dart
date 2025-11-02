@@ -30,6 +30,7 @@ class _AnimationTestWidgetState extends State<AnimationTestWidget> with WidgetCo
 
   @override
   Widget build(BuildContext context) {
+     incrementRebuild();
     return Center(
       child: Wrap(
         spacing: 10,

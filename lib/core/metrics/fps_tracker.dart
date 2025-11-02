@@ -40,4 +40,33 @@ class FpsTracker {
     if (all.isEmpty) return 0.0;
     return all.reduce(max);
   }
+
+  // НОВІ МЕТРИКИ ДЛЯ СТАТИСТИЧНОГО АНАЛІЗУ
+  
+  /// Стандартне відхилення часу кадру
+  double get stdDevFrameTimeMs {
+    final all = allFrameMs;
+    if (all.isEmpty) return 0.0;
+    final mean = avgFrameTimeMs;
+    final variance = all.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) / all.length;
+    return sqrt(variance);
+  }
+
+  /// 95-й процентиль часу кадру (для аналізу "jank")
+  double get percentile95FrameTimeMs {
+    final sorted = List<double>.from(allFrameMs)..sort();
+    if (sorted.isEmpty) return 0.0;
+    final index = (sorted.length * 0.95).floor();
+    return sorted[index];
+  }
+
+  /// Кількість "jank" кадрів (час кадру > 33.33 мс для < 30 FPS)
+  int get jankFramesCount => allFrameMs.where((ms) => ms > 33.33).length;
+
+  /// Відсоток "jank" кадрів
+  double get jankFramesPercent {
+    final all = allFrameMs;
+    if (all.isEmpty) return 0.0;
+    return (jankFramesCount / all.length) * 100;
+  }
 }

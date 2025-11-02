@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class WidgetCounter {
   int _rebuilds = 0;
 
-  // Простой конструктор
   WidgetCounter();
 
   int get rebuilds => _rebuilds;
@@ -14,8 +13,29 @@ class WidgetCounter {
   void reset() => _rebuilds = 0;
 }
 
+class WidgetCounterScope extends InheritedWidget {
+  final WidgetCounter counter;
+  
+  const WidgetCounterScope({
+    required this.counter,
+    required super.child,
+    super.key,
+  });
+  
+  static WidgetCounter of(BuildContext context) {
+    final result = context.dependOnInheritedWidgetOfExactType<WidgetCounterScope>();
+    assert(result != null, 'No WidgetCounterScope found in context');
+    return result!.counter;
+  }
+  
+  @override
+  bool updateShouldNotify(WidgetCounterScope oldWidget) => false;
+}
+
+// ПРОСТОЙ МІКСИН - без buildWidget
 mixin WidgetCounterMixin<T extends StatefulWidget> on State<T> {
   void incrementRebuild() {
-    WidgetCounter().increment();
+    final counter = WidgetCounterScope.of(context);
+    counter.increment();
   }
 }

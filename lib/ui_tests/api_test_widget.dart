@@ -31,6 +31,7 @@ class _ApiTestWidgetState extends State<ApiTestWidget> with WidgetCounterMixin {
 
   @override
   Widget build(BuildContext context) {
+         incrementRebuild();
     return Center(child: Text(data));
   }
 }
