@@ -98,80 +98,79 @@ class _TestRunnerScreenState extends State<TestRunnerScreen> {
   }
 
   Future<void> _runTests() async {
-    if (isRunning || activeTests.isEmpty) return;
+  if (isRunning || activeTests.isEmpty) return;
 
+  setState(() {
+    isRunning = true;
+    currentIteration = 0;
+  });
+
+  // Сброс и запуск сбора метрик для каждого теста
+  for (final recorder in _testRecorders.values) {
+    recorder.reset();
+    recorder.startListening();
+  }
+
+  // Setup всех тестов
+  for (final test in activeTests) {
+    await test.setup();
+  }
+
+  // Запуск итераций
+  final totalIterations = activeTests.isNotEmpty ? activeTests.first.iterations : 0;
+  
+  for (int i = 0; i < totalIterations; i++) {
+    if (!mounted) break;
+    
     setState(() {
-      isRunning = true;
-      currentIteration = 0;
+      currentIteration = i + 1;
     });
 
-    // Сброс и запуск сбора метрик для каждого теста
-    for (final recorder in _testRecorders.values) {
-      recorder.reset();
-      recorder.startListening();
-    }
-
-    // Setup всех тестов
+    // ЗАПУСКАЕМ ТЕСТЫ ПОСЛЕДОВАТЕЛЬНО, а не параллельно
     for (final test in activeTests) {
-      await test.setup();
-    }
-
-    // Запуск итераций
-    final totalIterations = activeTests.isNotEmpty ? activeTests.first.iterations : 0;
-    
-    for (int i = 0; i < totalIterations; i++) {
-      if (!mounted) break;
-      
-      setState(() {
-        currentIteration = i + 1;
-      });
-
-      // Начало измерения кадра для каждого теста
-      for (final recorder in _testRecorders.values) {
+      final recorder = _testRecorders[test.name];
+      if (recorder != null) {
+        // Начало измерения кадра для конкретного теста
         recorder.startFrame();
-      }
+        final testStart = DateTime.now();
 
-      final iterationStart = DateTime.now();
+        // Запускаем ОДИН тест
+        await test.runIteration();
 
-      // Запускаем все тесты параллельно
-      await Future.wait(
-        activeTests.map((test) => test.runIteration()),
-      );
-
-      // Измеряем латенцию (время выполнения итерации)
-      final iterationEnd = DateTime.now();
-      final latencyMs = iterationEnd.difference(iterationStart).inMilliseconds.toDouble();
-
-      // Записываем латенцию и завершаем кадр для каждого теста
-      for (final recorder in _testRecorders.values) {
+        // Измеряем латенцию для этого теста
+        final testEnd = DateTime.now();
+        final latencyMs = testEnd.difference(testStart).inMilliseconds.toDouble();
         recorder.recordLatencyMs(latencyMs);
+        
+        // Завершаем кадр для этого теста
         recorder.endFrame();
       }
-
-      // Небольшая задержка между итерациями для визуализации
-      await Future.delayed(const Duration(milliseconds: 10));
     }
 
-    // Teardown всех тестов
-    for (final test in activeTests) {
-      await test.teardown();
-    }
-
-    // Остановка сбора метрик для всех тестов
-    for (final recorder in _testRecorders.values) {
-      recorder.stopListening();
-    }
-
-    if (mounted) {
-      setState(() {
-        isRunning = false;
-      });
-      
-      // Сохранение результатов и переход на экран результатов
-      await _saveResults();
-      _navigateToResults();
-    }
+    // Небольшая задержка между итерациями для визуализации
+    await Future.delayed(const Duration(milliseconds: 10));
   }
+
+  // Teardown всех тестов
+  for (final test in activeTests) {
+    await test.teardown();
+  }
+
+  // Остановка сбора метрик для всех тестов
+  for (final recorder in _testRecorders.values) {
+    recorder.stopListening();
+  }
+
+  if (mounted) {
+    setState(() {
+      isRunning = false;
+    });
+    
+    // Сохранение результатов и переход на экран результатов
+    await _saveResults();
+    _navigateToResults();
+  }
+}
 
   Future<void> _saveResults() async {
     final cubit = context.read<TestConfigCubit>();
