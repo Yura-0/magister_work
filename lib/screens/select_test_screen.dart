@@ -68,9 +68,9 @@ class _TestSelectionForm extends StatelessWidget {
             // Количество итераций
             const IterationsInput(),
 
-            // Информация о предстоящем тесте
-            if (state.selectedTests.isNotEmpty && state.selectedManager != null)
-              const _TestInfoCard(),
+            // // Информация о предстоящем тесте
+            // if (state.selectedTests.isNotEmpty && state.selectedManager != null)
+            //   const _TestInfoCard(),
 
             const SizedBox(height: 16),
 

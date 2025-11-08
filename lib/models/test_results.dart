@@ -1,5 +1,4 @@
-// Модель результату тесту
-// Модель результату тесту
+// Модель результату тесту з детальними даними для графіків
 class TestResult {
   final String scenarioName;
   final String stateManager;
@@ -12,13 +11,27 @@ class TestResult {
   final double ramUsageMb;
   final int widgetRebuilds;
 
-  // Нові метрики для статистичного аналізу
+  // Статистичні метрики
   final double stdDevFrameTimeMs;
   final double percentile95FrameTimeMs;
   final int jankFramesCount;
   final double jankFramesPercent;
   final double minLatencyMs;
   final double maxLatencyMs;
+
+  // НОВІ СТАТИСТИЧНІ МЕТРИКИ
+  final double varianceFrameTimeMs;
+  final double varianceLatencyMs;
+  final double stdDevLatencyMs;
+  final double peakMemoryMb;
+  final double stdDevMemoryMb;
+
+  // ДЕТАЛЬНІ ДАНІ ДЛЯ ГРАФІКІВ
+  final List<double> frameTimesPerIteration;
+  final List<double> fpsPerIteration;
+  final List<int> frameTimestamps;
+  final List<double> latencyPerIteration;
+  final List<int> latencyTimestamps;
 
   final DateTime timestamp;
 
@@ -37,6 +50,18 @@ class TestResult {
     required this.jankFramesPercent,
     required this.minLatencyMs,
     required this.maxLatencyMs,
+    // Нові метрики
+    required this.varianceFrameTimeMs,
+    required this.varianceLatencyMs,
+    required this.stdDevLatencyMs,
+    required this.peakMemoryMb,
+    required this.stdDevMemoryMb,
+    // Детальні дані
+    required this.frameTimesPerIteration,
+    required this.fpsPerIteration,
+    required this.frameTimestamps,
+    required this.latencyPerIteration,
+    required this.latencyTimestamps,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
@@ -56,6 +81,18 @@ class TestResult {
       jankFramesPercent: (json["jankFramesPercent"] as num).toDouble(),
       minLatencyMs: (json["minLatencyMs"] as num).toDouble(),
       maxLatencyMs: (json["maxLatencyMs"] as num).toDouble(),
+      // Нові метрики
+      varianceFrameTimeMs: (json["varianceFrameTimeMs"] as num).toDouble(),
+      varianceLatencyMs: (json["varianceLatencyMs"] as num).toDouble(),
+      stdDevLatencyMs: (json["stdDevLatencyMs"] as num).toDouble(),
+      peakMemoryMb: (json["peakMemoryMb"] as num).toDouble(),
+      stdDevMemoryMb: (json["stdDevMemoryMb"] as num).toDouble(),
+      // Детальні дані
+      frameTimesPerIteration: List<double>.from(json["frameTimesPerIteration"] ?? []),
+      fpsPerIteration: List<double>.from(json["fpsPerIteration"] ?? []),
+      frameTimestamps: List<int>.from(json["frameTimestamps"] ?? []),
+      latencyPerIteration: List<double>.from(json["latencyPerIteration"] ?? []),
+      latencyTimestamps: List<int>.from(json["latencyTimestamps"] ?? []),
       timestamp: DateTime.parse(json["timestamp"] as String),
     );
   }
@@ -75,6 +112,18 @@ class TestResult {
         "jankFramesPercent": jankFramesPercent,
         "minLatencyMs": minLatencyMs,
         "maxLatencyMs": maxLatencyMs,
+        // Нові метрики
+        "varianceFrameTimeMs": varianceFrameTimeMs,
+        "varianceLatencyMs": varianceLatencyMs,
+        "stdDevLatencyMs": stdDevLatencyMs,
+        "peakMemoryMb": peakMemoryMb,
+        "stdDevMemoryMb": stdDevMemoryMb,
+        // Детальні дані для графіків
+        "frameTimesPerIteration": frameTimesPerIteration,
+        "fpsPerIteration": fpsPerIteration,
+        "frameTimestamps": frameTimestamps,
+        "latencyPerIteration": latencyPerIteration,
+        "latencyTimestamps": latencyTimestamps,
         "timestamp": timestamp.toIso8601String(),
       };
 }

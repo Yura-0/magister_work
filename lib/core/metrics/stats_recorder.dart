@@ -1,4 +1,4 @@
-// Універсальний рекордер параметрів
+// Універсальний рекордер параметрів з детальними даними
 import 'package:flutter/scheduler.dart';
 import 'package:magi_work/models/test_results.dart';
 import 'fps_tracker.dart';
@@ -85,6 +85,18 @@ class StatsRecorder {
       jankFramesPercent: fpsTracker.jankFramesPercent,
       minLatencyMs: latencyTracker.minLatencyMs,
       maxLatencyMs: latencyTracker.maxLatencyMs,
+      // НОВІ МЕТРИКИ
+      varianceFrameTimeMs: fpsTracker.varianceFrameTimeMs,
+      varianceLatencyMs: latencyTracker.varianceLatencyMs,
+      stdDevLatencyMs: latencyTracker.stdDevLatencyMs,
+      peakMemoryMb: memoryTracker.peakMemoryMb,
+      stdDevMemoryMb: memoryTracker.stdDevMemoryMb,
+      // ДЕТАЛЬНІ ДАНІ ДЛЯ ГРАФІКІВ
+      frameTimesPerIteration: fpsTracker.frameTimesPerIteration,
+      fpsPerIteration: fpsTracker.fpsPerIteration,
+      frameTimestamps: fpsTracker.frameTimestamps,
+      latencyPerIteration: latencyTracker.latencyPerIteration,
+      latencyTimestamps: latencyTracker.latencyTimestamps,
     );
   }
 }
