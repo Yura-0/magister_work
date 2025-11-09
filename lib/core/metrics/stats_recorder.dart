@@ -73,30 +73,37 @@ class StatsRecorder {
       scenarioName: scenario,
       stateManager: manager,
       iterations: iterations,
+      
+      // ОСНОВНІ МЕТРИКИ
       avgFps: fpsTracker.avgFps,
       avgFrameTimeMs: fpsTracker.avgFrameTimeMs,
       avgLatencyMs: latencyTracker.avgLatencyMs,
       ramUsageMb: memoryTracker.avgMemoryMb,
       widgetRebuilds: widgetCounter.rebuilds,
-      // Нові метрики
+      
+      // СТАТИСТИЧНІ МЕТРИКИ
       stdDevFrameTimeMs: fpsTracker.stdDevFrameTimeMs,
       percentile95FrameTimeMs: fpsTracker.percentile95FrameTimeMs,
       jankFramesCount: fpsTracker.jankFramesCount,
       jankFramesPercent: fpsTracker.jankFramesPercent,
       minLatencyMs: latencyTracker.minLatencyMs,
       maxLatencyMs: latencyTracker.maxLatencyMs,
-      // НОВІ МЕТРИКИ
+      
+      // ДИСПЕРСІЇ ТА СТАНДАРТНІ ВІДХИЛЕННЯ
       varianceFrameTimeMs: fpsTracker.varianceFrameTimeMs,
       varianceLatencyMs: latencyTracker.varianceLatencyMs,
       stdDevLatencyMs: latencyTracker.stdDevLatencyMs,
+      varianceFps: fpsTracker.varianceFps, //  ДОДАНО ДИСПЕРСІЮ FPS
+      stdDevFps: fpsTracker.stdDevFps,     //  ДОДАНО СТАНДАРТНЕ ВІДХИЛЕННЯ FPS
+      
+      // ПАМ'ЯТЬ
       peakMemoryMb: memoryTracker.peakMemoryMb,
       stdDevMemoryMb: memoryTracker.stdDevMemoryMb,
-      // ДЕТАЛЬНІ ДАНІ ДЛЯ ГРАФІКІВ
-      frameTimesPerIteration: fpsTracker.frameTimesPerIteration,
-      fpsPerIteration: fpsTracker.fpsPerIteration,
-      frameTimestamps: fpsTracker.frameTimestamps,
-      latencyPerIteration: latencyTracker.latencyPerIteration,
-      latencyTimestamps: latencyTracker.latencyTimestamps,
+      
+      // АГРЕГОВАНІ ДАНІ ДЛЯ ГРАФІКІВ (замість детальних)
+      frameTimeDistribution: fpsTracker.getAggregatedFrameTimes(15), // 15 бакетів
+      latencyDistribution: latencyTracker.getAggregatedLatencies(15), // 15 бакетів
+      memoryUsageOverTime: memoryTracker.getMemorySamples(20), // 20 точок
     );
   }
 }

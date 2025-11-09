@@ -19,19 +19,21 @@ class TestResult {
   final double minLatencyMs;
   final double maxLatencyMs;
 
-  // НОВІ СТАТИСТИЧНІ МЕТРИКИ
+  // 👇 ДИСПЕРСІЇ ТА СТАНДАРТНІ ВІДХИЛЕННЯ
   final double varianceFrameTimeMs;
   final double varianceLatencyMs;
   final double stdDevLatencyMs;
+  final double varianceFps;       // 👈 ДОДАНО
+  final double stdDevFps;         // 👈 ДОДАНО
+  
+  // Пам'ять
   final double peakMemoryMb;
   final double stdDevMemoryMb;
 
-  // ДЕТАЛЬНІ ДАНІ ДЛЯ ГРАФІКІВ
-  final List<double> frameTimesPerIteration;
-  final List<double> fpsPerIteration;
-  final List<int> frameTimestamps;
-  final List<double> latencyPerIteration;
-  final List<int> latencyTimestamps;
+  // 👇 АГРЕГОВАНІ ДАНІ ДЛЯ ГРАФІКІВ
+  final Map<double, int> frameTimeDistribution; // {16.0: 150, 32.0: 80, ...}
+  final Map<double, int> latencyDistribution;   // {10.0: 200, 20.0: 50, ...}  
+  final List<double> memoryUsageOverTime;       // [125.5, 126.8, ...]
 
   final DateTime timestamp;
 
@@ -50,22 +52,20 @@ class TestResult {
     required this.jankFramesPercent,
     required this.minLatencyMs,
     required this.maxLatencyMs,
-    // Нові метрики
     required this.varianceFrameTimeMs,
     required this.varianceLatencyMs,
     required this.stdDevLatencyMs,
+    required this.varianceFps,    // 👈 ДОДАНО
+    required this.stdDevFps,      // 👈 ДОДАНО
     required this.peakMemoryMb,
     required this.stdDevMemoryMb,
-    // Детальні дані
-    required this.frameTimesPerIteration,
-    required this.fpsPerIteration,
-    required this.frameTimestamps,
-    required this.latencyPerIteration,
-    required this.latencyTimestamps,
+    required this.frameTimeDistribution,
+    required this.latencyDistribution,
+    required this.memoryUsageOverTime,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
-  factory TestResult.fromJson(Map<String, dynamic> json) {
+   factory TestResult.fromJson(Map<String, dynamic> json) {
     return TestResult(
       scenarioName: json["scenarioName"] as String,
       stateManager: json["stateManager"] as String,
@@ -81,18 +81,18 @@ class TestResult {
       jankFramesPercent: (json["jankFramesPercent"] as num).toDouble(),
       minLatencyMs: (json["minLatencyMs"] as num).toDouble(),
       maxLatencyMs: (json["maxLatencyMs"] as num).toDouble(),
-      // Нові метрики
+      // НОВІ МЕТРИКИ
       varianceFrameTimeMs: (json["varianceFrameTimeMs"] as num).toDouble(),
       varianceLatencyMs: (json["varianceLatencyMs"] as num).toDouble(),
       stdDevLatencyMs: (json["stdDevLatencyMs"] as num).toDouble(),
+      varianceFps: (json["varianceFps"] as num).toDouble(),
+      stdDevFps: (json["stdDevFps"] as num).toDouble(),
       peakMemoryMb: (json["peakMemoryMb"] as num).toDouble(),
       stdDevMemoryMb: (json["stdDevMemoryMb"] as num).toDouble(),
-      // Детальні дані
-      frameTimesPerIteration: List<double>.from(json["frameTimesPerIteration"] ?? []),
-      fpsPerIteration: List<double>.from(json["fpsPerIteration"] ?? []),
-      frameTimestamps: List<int>.from(json["frameTimestamps"] ?? []),
-      latencyPerIteration: List<double>.from(json["latencyPerIteration"] ?? []),
-      latencyTimestamps: List<int>.from(json["latencyTimestamps"] ?? []),
+      // АГРЕГОВАНІ ДАНІ
+      frameTimeDistribution: _parseDistribution(json["frameTimeDistribution"]),
+      latencyDistribution: _parseDistribution(json["latencyDistribution"]),
+      memoryUsageOverTime: List<double>.from(json["memoryUsageOverTime"] ?? []),
       timestamp: DateTime.parse(json["timestamp"] as String),
     );
   }
@@ -112,18 +112,40 @@ class TestResult {
         "jankFramesPercent": jankFramesPercent,
         "minLatencyMs": minLatencyMs,
         "maxLatencyMs": maxLatencyMs,
-        // Нові метрики
+        // НОВІ МЕТРИКИ
         "varianceFrameTimeMs": varianceFrameTimeMs,
         "varianceLatencyMs": varianceLatencyMs,
         "stdDevLatencyMs": stdDevLatencyMs,
+        "varianceFps": varianceFps,
+        "stdDevFps": stdDevFps,
         "peakMemoryMb": peakMemoryMb,
         "stdDevMemoryMb": stdDevMemoryMb,
-        // Детальні дані для графіків
-        "frameTimesPerIteration": frameTimesPerIteration,
-        "fpsPerIteration": fpsPerIteration,
-        "frameTimestamps": frameTimestamps,
-        "latencyPerIteration": latencyPerIteration,
-        "latencyTimestamps": latencyTimestamps,
+        // АГРЕГОВАНІ ДАНІ
+        "frameTimeDistribution": _distributionToJson(frameTimeDistribution),
+        "latencyDistribution": _distributionToJson(latencyDistribution),
+        "memoryUsageOverTime": memoryUsageOverTime,
         "timestamp": timestamp.toIso8601String(),
       };
+
+  // Допоміжні методи для роботи з Map<double, int>
+  static Map<double, int> _parseDistribution(dynamic jsonData) {
+    if (jsonData == null) return {};
+    
+    final Map<double, int> result = {};
+    final Map<String, dynamic> data = Map<String, dynamic>.from(jsonData);
+    
+    data.forEach((key, value) {
+      result[double.parse(key)] = value as int;
+    });
+    
+    return result;
+  }
+
+  static Map<String, int> _distributionToJson(Map<double, int> distribution) {
+    final Map<String, int> result = {};
+    distribution.forEach((key, value) {
+      result[key.toString()] = value;
+    });
+    return result;
+  }
 }

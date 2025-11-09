@@ -1,28 +1,17 @@
 import 'dart:math';
 
 /// Трекер затримки кадрів у секундах з детальними даними
+
 class LatencyTracker {
   final List<double> _latMs = [];
   
-  // НОВЕ: Детальні записи для графіків
-  final List<double> _latencyPerIteration = []; // Затримки по ітераціях
-  final List<int> _latencyTimestamps = []; // Таймстемпи
-
   void recordLatencyMs(double ms) {
     _latMs.add(ms);
-    _latencyPerIteration.add(ms);
-    _latencyTimestamps.add(DateTime.now().millisecondsSinceEpoch);
   }
 
   void clear() {
     _latMs.clear();
-    _latencyPerIteration.clear();
-    _latencyTimestamps.clear();
   }
-
-  // НОВЕ: Детальні дані для графіків
-  List<double> get latencyPerIteration => _latencyPerIteration;
-  List<int> get latencyTimestamps => _latencyTimestamps;
 
   double get avgLatencyMs {
     if (_latMs.isEmpty) return 0.0;
@@ -41,4 +30,20 @@ class LatencyTracker {
 
   double get minLatencyMs => _latMs.isEmpty ? 0.0 : _latMs.reduce((a, b) => a < b ? a : b);
   double get maxLatencyMs => _latMs.isEmpty ? 0.0 : _latMs.reduce((a, b) => a > b ? a : b);
+
+  // 👇 НОВИЙ МЕТОД ДЛЯ АГРЕГОВАНИХ ДАНИХ
+  Map<double, int> getAggregatedLatencies(int buckets) {
+    if (_latMs.isEmpty) return {};
+    
+    final maxLatency = _latMs.reduce((a, b) => a > b ? a : b);
+    final bucketSize = maxLatency / buckets;
+    
+    Map<double, int> distribution = {};
+    for (double latency in _latMs) {
+      double bucket = (latency / bucketSize).floor() * bucketSize;
+      distribution[bucket] = (distribution[bucket] ?? 0) + 1;
+    }
+    
+    return distribution;
+  }
 }

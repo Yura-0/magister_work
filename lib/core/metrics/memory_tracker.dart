@@ -5,7 +5,6 @@ import 'dart:math';
 class MemoryTracker {
   final List<double> memoryMb = [];
   
-  // НОВЕ: Пікова пам'ять
   double _peakMemoryMb = 0.0;
 
   void record() {
@@ -14,7 +13,6 @@ class MemoryTracker {
       final usedMb = usedBytes / (1024 * 1024);
       memoryMb.add(usedMb);
       
-      // Оновлюємо пікову пам'ять
       if (usedMb > _peakMemoryMb) {
         _peakMemoryMb = usedMb;
       }
@@ -34,15 +32,36 @@ class MemoryTracker {
     return valid.reduce((a, b) => a + b) / valid.length;
   }
 
-  // НОВЕ: Пікова пам'ять
   double get peakMemoryMb => _peakMemoryMb;
 
-  // НОВЕ: Стандартне відхилення використання пам'яті
   double get stdDevMemoryMb {
     final valid = memoryMb.where((v) => v >= 0).toList();
     if (valid.isEmpty) return 0.0;
     final mean = avgMemoryMb;
     final variance = valid.map((x) => pow(x - mean, 2)).reduce((a, b) => a + b) / valid.length;
     return sqrt(variance);
+  }
+
+  // 👇 НОВИЙ МЕТОД ДЛЯ АГРЕГОВАНИХ ДАНИХ
+  List<double> getMemorySamples(int sampleCount) {
+    final valid = memoryMb.where((v) => v >= 0).toList();
+    if (valid.isEmpty) return [];
+    
+    List<double> samples = [];
+    final step = valid.length ~/ sampleCount;
+    
+    for (int i = 0; i < valid.length; i += step) {
+      if (i < valid.length) {
+        samples.add(valid[i]);
+      }
+      if (samples.length >= sampleCount) break;
+    }
+    
+    // Додаємо останнє значення, якщо ще є місце
+    if (samples.length < sampleCount && valid.isNotEmpty) {
+      samples.add(valid.last);
+    }
+    
+    return samples;
   }
 }
